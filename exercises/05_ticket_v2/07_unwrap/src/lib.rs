@@ -1,9 +1,43 @@
+use core::fmt;
+use std::error::Error;
+
 // TODO: `easy_ticket` should panic when the title is invalid.
 //   When the description is invalid, instead, it should use a default description:
 //   "Description not provided".
 fn easy_ticket(title: String, description: String, status: Status) -> Ticket {
-    todo!()
+    match Ticket::new(title.clone(), description.clone(), status.clone()) {
+        Ok(ticket) => ticket,
+        Err(TicketError::EmptyDescription) | Err(TicketError::DescriptionTooLong) => {
+            Ticket::new(title, "Description not provided".into(), status).unwrap()
+        }
+        Err(error) => panic!("{}", error),
+    }
 }
+
+#[derive(Debug)]
+enum TicketError {
+    EmptyTitle,
+    TitleTooLong,
+    EmptyDescription,
+    DescriptionTooLong,
+}
+
+impl fmt::Display for TicketError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                TicketError::EmptyTitle => "Title cannot be empty",
+                TicketError::TitleTooLong => "Title cannot be longer than 50 bytes",
+                TicketError::EmptyDescription => "Description cannot be empty",
+                TicketError::DescriptionTooLong => "Description cannot be longer than 500 bytes",
+            }
+        )
+    }
+}
+
+impl Error for TicketError {}
 
 #[derive(Debug, PartialEq, Clone)]
 struct Ticket {
@@ -20,18 +54,18 @@ enum Status {
 }
 
 impl Ticket {
-    pub fn new(title: String, description: String, status: Status) -> Result<Ticket, String> {
+    pub fn new(title: String, description: String, status: Status) -> Result<Ticket, TicketError> {
         if title.is_empty() {
-            return Err("Title cannot be empty".to_string());
+            return Err(TicketError::EmptyTitle);
         }
         if title.len() > 50 {
-            return Err("Title cannot be longer than 50 bytes".to_string());
+            return Err(TicketError::TitleTooLong);
         }
         if description.is_empty() {
-            return Err("Description cannot be empty".to_string());
+            return Err(TicketError::EmptyDescription);
         }
         if description.len() > 500 {
-            return Err("Description cannot be longer than 500 bytes".to_string());
+            return Err(TicketError::DescriptionTooLong);
         }
 
         Ok(Ticket {
