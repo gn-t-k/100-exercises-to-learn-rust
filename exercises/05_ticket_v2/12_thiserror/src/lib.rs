@@ -9,7 +9,7 @@ use std::error;
 enum TicketNewError {
     #[error("Title cannot be empty")]
     TitleCannotBeEmpty,
-    #[error("Title too long")]
+    #[error("Title cannot be longer than 50 bytes")]
     TitleTooLong,
     #[error("Description cannot be empty")]
     DescriptionCannotBeEmpty,
