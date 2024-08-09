@@ -2,7 +2,38 @@
 //   enforcing that the description is not empty and is not longer than 500 bytes.
 //   Implement the traits required to make the tests pass too.
 
+#[derive(Debug, PartialEq, Clone)]
 pub struct TicketDescription(String);
+
+impl TryFrom<String> for TicketDescription {
+    type Error = DescriptionTryFromError;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        if value.is_empty() {
+            return Err(DescriptionTryFromError::CannotBeEmpty);
+        }
+        if value.len() > 500 {
+            return Err(DescriptionTryFromError::TooLong);
+        }
+        Ok(TicketDescription(value))
+    }
+}
+
+impl TryFrom<&str> for TicketDescription {
+    type Error = DescriptionTryFromError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        value.to_string().try_into()
+    }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum DescriptionTryFromError {
+    #[error("The description cannot be empty")]
+    CannotBeEmpty,
+    #[error("The description cannot be longer than 500 bytes")]
+    TooLong,
+}
 
 #[cfg(test)]
 mod tests {
