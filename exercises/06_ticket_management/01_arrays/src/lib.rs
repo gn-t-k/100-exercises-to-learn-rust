@@ -21,16 +21,16 @@ impl WeekTemperatures {
     }
 
     pub fn get_temperature(&self, day: Weekday) -> Option<i32> {
-        let index = Self::weekday_to_index(day);
+        let index = Self::weekday_to_index(&day);
         self.temperatures[index]
     }
 
     pub fn set_temperature(&mut self, day: Weekday, temperature: i32) {
-        let index = Self::weekday_to_index(day);
+        let index = Self::weekday_to_index(&day);
         self.temperatures[index] = Some(temperature);
     }
 
-    fn weekday_to_index(day: Weekday) -> usize {
+    fn weekday_to_index(day: &Weekday) -> usize {
         match day {
             Weekday::Monday => 0,
             Weekday::Tuesday => 1,
