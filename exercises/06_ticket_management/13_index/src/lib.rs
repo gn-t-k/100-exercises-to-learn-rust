@@ -1,8 +1,10 @@
 // TODO: Implement `Index<&TicketId>` and `Index<TicketId>` for `TicketStore`.
 
+use std::ops::Index;
+
 use ticket_fields::{TicketDescription, TicketTitle};
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct TicketStore {
     tickets: Vec<Ticket>,
     counter: u64,
@@ -34,10 +36,7 @@ pub enum Status {
 
 impl TicketStore {
     pub fn new() -> Self {
-        Self {
-            tickets: Vec::new(),
-            counter: 0,
-        }
+        Self::default()
     }
 
     pub fn add_ticket(&mut self, ticket: TicketDraft) -> TicketId {
@@ -55,6 +54,22 @@ impl TicketStore {
 
     pub fn get(&self, id: TicketId) -> Option<&Ticket> {
         self.tickets.iter().find(|&t| t.id == id)
+    }
+}
+
+impl Index<TicketId> for TicketStore {
+    type Output = Ticket;
+
+    fn index(&self, id: TicketId) -> &Self::Output {
+        self.tickets.iter().find(|ticket| ticket.id == id).unwrap()
+    }
+}
+
+impl Index<&TicketId> for TicketStore {
+    type Output = Ticket;
+
+    fn index(&self, id: &TicketId) -> &Self::Output {
+        &self[*id]
     }
 }
 
