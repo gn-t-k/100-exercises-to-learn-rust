@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::ops::{Index, IndexMut};
 use ticket_fields::{TicketDescription, TicketTitle};
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct TicketStore {
     tickets: HashMap<TicketId, Ticket>,
     counter: u64,
@@ -37,10 +37,7 @@ pub enum Status {
 
 impl TicketStore {
     pub fn new() -> Self {
-        Self {
-            tickets: todo!(),
-            counter: 0,
-        }
+        Self::default()
     }
 
     pub fn add_ticket(&mut self, ticket: TicketDraft) -> TicketId {
