@@ -24,7 +24,25 @@ pub fn sum(v: Vec<i32>) -> i32 {
 
 #[cfg(test)]
 mod tests {
+    use std::{cell::RefCell, rc::Rc};
+
     use super::*;
+
+    #[test]
+    fn test() {
+        let data = RefCell::new(5);
+
+        // 不変な借用（読み取り）
+        let borrowed = data.borrow();
+        assert_eq!(5, *borrowed);
+
+        // 可変な借用（書き込み）
+        let mut borrowed_mut = data.borrow_mut();
+        *borrowed_mut += 10;
+        assert_eq!(15, *borrowed_mut);
+
+        assert_eq!(15, *data.borrow());
+    }
 
     #[test]
     fn empty() {
