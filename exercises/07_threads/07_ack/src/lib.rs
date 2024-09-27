@@ -1,5 +1,5 @@
+use data::{Ticket, TicketDraft};
 use std::sync::mpsc::{Receiver, Sender};
-use data::TicketDraft;
 use store::TicketId;
 
 use crate::store::TicketStore;
@@ -11,12 +11,12 @@ pub mod store;
 pub enum Command {
     Insert {
         draft: TicketDraft,
-        response_sender: Sender<TicketId>
+        response_sender: Sender<TicketId>,
     },
     Get {
-        ticket_id: TicketId,
-        response_sender: Sender<TicketId>
-    }
+        id: TicketId,
+        response_sender: Sender<Option<Ticket>>,
+    },
 }
 
 pub fn launch() -> Sender<Command> {
@@ -30,19 +30,25 @@ pub fn server(receiver: Receiver<Command>) {
     let mut store = TicketStore::new();
     loop {
         match receiver.recv() {
-            Ok(Command::Insert {}) => {
-                todo!()
+            Ok(Command::Insert {
+                draft,
+                response_sender,
+            }) => {
+                let id = store.add_ticket(draft);
+                let _ = response_sender.send(id);
             }
             Ok(Command::Get {
-                todo!()
+                id,
+                response_sender,
             }) => {
-                todo!()
+                let ticket = store.get(id);
+                let _ = response_sender.send(ticket.cloned());
             }
             Err(_) => {
                 // There are no more senders, so we can safely break
                 // and shut down the server.
-                break
-            },
+                break;
+            }
         }
     }
 }
