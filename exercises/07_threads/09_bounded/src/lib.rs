@@ -1,7 +1,7 @@
 // TODO: Convert the implementation to use bounded channels.
 use crate::data::{Ticket, TicketDraft};
 use crate::store::{TicketId, TicketStore};
-use std::sync::mpsc::{sync_channel, Receiver, Sender, SyncSender};
+use std::sync::mpsc::{sync_channel, Receiver, SendError, Sender, SyncSender};
 
 pub mod data;
 pub mod store;
@@ -12,12 +12,26 @@ pub struct TicketStoreClient {
 }
 
 impl TicketStoreClient {
-    pub fn insert(&self, draft: TicketDraft) -> Result<TicketId, todo!()> {
-        todo!()
+    pub fn insert(&self, draft: TicketDraft) -> Result<TicketId, SendError<Command>> {
+        let (response_sender, response_receiver) = std::sync::mpsc::channel();
+        let command = Command::Insert {
+            draft,
+            response_channel: response_sender,
+        };
+        self.sender.send(command)?;
+
+        Ok(response_receiver.recv().expect("No response received!"))
     }
 
-    pub fn get(&self, id: TicketId) -> Result<Option<Ticket>, todo!()> {
-        todo!()
+    pub fn get(&self, id: TicketId) -> Result<Option<Ticket>, SendError<Command>> {
+        let (response_sender, response_receiver) = std::sync::mpsc::channel();
+        let command = Command::Get {
+            id,
+            response_channel: response_sender,
+        };
+        self.sender.send(command)?;
+
+        Ok(response_receiver.recv().expect("No response received!"))
     }
 }
 
@@ -30,11 +44,11 @@ pub fn launch(capacity: usize) -> TicketStoreClient {
 enum Command {
     Insert {
         draft: TicketDraft,
-        response_channel: todo!(),
+        response_channel: Sender<TicketId>,
     },
     Get {
         id: TicketId,
-        response_channel: todo!(),
+        response_channel: Sender<Option<Ticket>>,
     },
 }
 
