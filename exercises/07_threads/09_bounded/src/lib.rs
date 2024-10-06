@@ -41,7 +41,7 @@ pub fn launch(capacity: usize) -> TicketStoreClient {
     TicketStoreClient { sender }
 }
 
-enum Command {
+pub enum Command {
     Insert {
         draft: TicketDraft,
         response_channel: Sender<TicketId>,
@@ -61,14 +61,14 @@ pub fn server(receiver: Receiver<Command>) {
                 response_channel,
             }) => {
                 let id = store.add_ticket(draft);
-                todo!()
+                let _ = response_channel.send(id);
             }
             Ok(Command::Get {
                 id,
                 response_channel,
             }) => {
-                let ticket = store.get(id);
-                todo!()
+                let ticket = store.get(id).cloned();
+                let _ = response_channel.send(ticket);
             }
             Err(_) => {
                 // There are no more senders, so we can safely break
